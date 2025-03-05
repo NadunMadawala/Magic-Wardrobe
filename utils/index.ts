@@ -38,13 +38,13 @@ export const dashboardLinks =[
     
 ]
 export const tools =[
-    {
-        label: 'Dashboard',
-        icon:'lucide:layout-dashboard',
-        link: '/dashboard',
-        color:'text-purple-800',
-        bgColor:'bg-purple-800/10'
-    },
+    // {
+    //     label: 'Dashboard',
+    //     icon:'lucide:layout-dashboard',
+    //     link: '/dashboard',
+    //     color:'text-purple-800',
+    //     bgColor:'bg-purple-800/10'
+    // },
     {
         label: 'Looks',
         icon:'lucide:shirt',

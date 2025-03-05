@@ -17,6 +17,11 @@ export default defineNuxtConfig({
     path: '~/components/ui',
     extensions: ['.vue'],
     prefix: ''
+  },
+  {
+    path: '~/components/shared',
+    extensions: ['.vue'],
+    prefix: ''
   },],
 
     supabase: {
@@ -28,6 +33,9 @@ export default defineNuxtConfig({
         cookieRedirect: false,
       }
     
+    },
+    runtimeConfig:{
+      openaiKey:''
     }
 
   
