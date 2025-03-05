@@ -33,13 +33,30 @@
           >
         </form>
       </div>
-    </div>
-    <div class="space-y mt-4">
-      <div
-        v-if="!isLoading"
-        class="p-8 rounded-lg w-full flex items-center justify-center bg-muted"
-      >
-        <Loader />
+
+      <div class="space-y mt-4">
+        <div
+          v-if="isLoading"
+          class="p-8 rounded-lg w-full flex items-center justify-center bg-muted"
+        >
+          <Loader />
+        </div>
+        <Empty label="No Conversation Found" />
+        <div class="flex flex-col-reverse gap-y-4">
+          <div
+            v-for="(message, i) in messages"
+            :key="i"
+            :class="`p-8 w-full rounded-lg ${
+              message.role === 'user'
+                ? 'bg-white border border-black/10'
+                : 'bg-slate-20'
+            }`"
+          >
+            <p class="text-sm">
+              {{ message.content }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
     <!-- Loader -->
@@ -51,9 +68,14 @@
 
 <script setup lang="ts">
 import Heading from "~/components/ui/shared/Heading.vue";
+import Loader from "~/components/ui/shared/Loader.vue";
+import Empty from "~/components/ui/shared/Empty.vue";
 
-const prompt = ref<string>("");
+import { ChatCompletionRequestMessage } from "~/types";
+
+const prompt = ref("");
 const isLoading = ref(false);
+const messages = ref<ChatCompletionRequestMessage[]>([]);
 </script>
 
 <style scoped></style>
