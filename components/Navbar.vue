@@ -1,6 +1,7 @@
 <template>
   <div class="flex item-center p-4">
     <!-- MobileSidee -->
+    <!-- <MobileSidebar /> -->
     <div class="flex w-full justify-end">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
@@ -56,6 +57,7 @@ import {
 import Avatar from "./ui/avatar/Avatar.vue";
 import AvatarImage from "./ui/avatar/AvatarImage.vue";
 import AvatarFallback from "./ui/avatar/AvatarFallback.vue";
+import { MobileSidebar } from "#components";
 
 const user = useSupabaseUser();
 const supabaseClient = useSupabaseClient();
