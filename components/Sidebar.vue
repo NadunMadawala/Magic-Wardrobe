@@ -17,7 +17,7 @@
             'bg-muted': currentRoute.path === route.link,
           }"
         >
-          <div class="flex items-center flex-1">
+          <div class="flex items-center flex-1 capitalize">
             <Icon :name="route.icon" :class="`h-5 w-5 mr-3 ${route.color}`" />
             {{ route.label }}
           </div>

@@ -12,7 +12,7 @@
             :appearance="{
               theme: ThemeSupa,
             }"
-            :providers="['google', 'facebook']"
+            :providers="['google']"
             redirectTo="/"
           />
         </CardContent>
@@ -32,4 +32,3 @@ import { Card } from "~/components/ui/card";
 const supabaseClient = useSupabaseClient();
 definePageMeta({ layout: "home" });
 </script>
-  

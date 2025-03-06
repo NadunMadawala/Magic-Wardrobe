@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 lg:px-8 flex items-center gap-x-3 mb-3">
+  <div class="px-4 lg:px-8 flex items-center gap-x-3 mb-6">
     <div :class="`p-2 w-fit rounded-md ${bgColor}`">
       <Icon :name="icon" :class="`h-10 w-10 ${iconColor}`" />
     </div>
