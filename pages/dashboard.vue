@@ -28,9 +28,17 @@
         <Icon name="lucide:square-chevron-right" class="h-5 w-5" />
       </div>
     </div>
+    <br />
+    <h1 class="text-pxl md:text-2xl font-bold text-center">
+      Add Your Clothes to the Magic Wardrobe
+    </h1>
+    <br />
+    <ClothesForm />
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import ClothesForm from "~/components/ClothesForm.vue";
+</script>
 
 <style scoped></style>

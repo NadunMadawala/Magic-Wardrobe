@@ -20,7 +20,10 @@
 </template>
 
 <script setup lang="ts">
-const user = useSupabaseClientUser();
+// const user = useSupabaseClientUser();
+
+const user = useSupabaseUser();
+const supabaseClient = useSupabaseClient();
 </script>
 
 <style scoped></style>

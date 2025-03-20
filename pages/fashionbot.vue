@@ -77,8 +77,65 @@
 import Heading from "~/components/ui/shared/Heading.vue";
 import Loader from "~/components/ui/shared/Loader.vue";
 import Empty from "~/components/ui/shared/Empty.vue";
+import UserAvatar from "~/components/ui/shared/UserAvatar.vue";
+import type { ChatCompletionRequestMessage } from "~/types";
 
-import { ChatCompletionRequestMessage } from "~/types";
+const prompt = ref("");
+const isLoading = ref(false);
+const messages = ref<ChatCompletionRequestMessage[]>([]);
+
+const submitForm = async () => {
+  if (!prompt.value.trim()) return; // Prevent empty messages
+
+  isLoading.value = true;
+  const userMessage: ChatCompletionRequestMessage = {
+    role: "user",
+    content: prompt.value,
+  };
+
+  const newMessages = [...messages.value, userMessage];
+
+  try {
+    const { data, error } = await useFetch("/api/conversation", {
+      method: "POST",
+      body: JSON.stringify({ messages: newMessages }), // ✅ Fix JSON format
+    });
+
+    if (data.value) {
+      messages.value.push(userMessage, {
+        role: "assistant",
+        content: data.value?.content || "I'm not sure how to respond to that.",
+      });
+    }
+
+    if (error.value) {
+      console.error("[Conversation_Error]", error.value.statusMessage);
+      messages.value.push({
+        role: "assistant",
+        content: "Oops! Something went wrong. Please try again.",
+      });
+    }
+  } catch (err) {
+    console.error("[API_ERROR]", err);
+    messages.value.push({
+      role: "assistant",
+      content: "Something went wrong with the server.",
+    });
+  } finally {
+    isLoading.value = false;
+    prompt.value = ""; // Clear input field
+  }
+};
+</script>
+
+<!-- <script setup lang="ts">
+import Heading from "~/components/ui/shared/Heading.vue";
+import Loader from "~/components/ui/shared/Loader.vue";
+import Empty from "~/components/ui/shared/Empty.vue";
+
+// import { ChatCompletionRequestMessage } from "~/types";
+import type { ChatCompletionRequestMessage } from "~/types";
+
 import UserAvatar from "~/components/ui/shared/UserAvatar.vue";
 
 const prompt = ref("");
@@ -114,6 +171,6 @@ const submitForm = async () => {
   }
   isLoading.value = false;
 };
-</script>
+</script> -->
 
 <style scoped></style>

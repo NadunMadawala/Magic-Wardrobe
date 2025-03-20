@@ -4,7 +4,7 @@
     <div class="max-w-[800px] w-full mx-auto">
       <Card>
         <CardTitle>
-          <div class="text-center py-4">Welcome</div>
+          <div class="text-center py-4">Welcome To Magic Wardrobe..!</div>
         </CardTitle>
         <CardContent>
           <Auth
