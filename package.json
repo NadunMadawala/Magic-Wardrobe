@@ -19,7 +19,7 @@
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.477.0",
     "nuxt": "^3.15.2",
-    "openai": "^4.86.1",
+    "openai": "^4.91.1",
     "radix-vue": "^1.9.12",
     "reka-ui": "^2.0.2",
     "shadcn-nuxt": "0.11.3",

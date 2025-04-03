@@ -13,7 +13,7 @@
       <input
         v-model="occasion"
         type="text"
-        placeholder="Occasion (Casual, Formal,Party etc.)"
+        placeholder="Occasion (Casual, Formal, etc.)"
         required
       />
       <input
@@ -75,7 +75,7 @@ import { useSupabaseClient } from "#imports";
 
 const supabase = useSupabaseClient();
 
-// Form Fields
+// Form fields
 const name = ref("");
 const category = ref("");
 const color = ref("");
@@ -84,7 +84,7 @@ const weather = ref("");
 const file = ref<File | null>(null);
 const editingId = ref<string | null>(null);
 
-// Clothes List
+// Clothing list
 const clothes = ref<
   Array<{
     id: string;
@@ -97,7 +97,7 @@ const clothes = ref<
   }>
 >([]);
 
-// Handle file selection
+// File select handler
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files?.length) {
@@ -105,70 +105,80 @@ const handleFileUpload = (event: Event) => {
   }
 };
 
-// Fetch all clothing items from Supabase
+// Load clothes from DB
 const fetchClothes = async () => {
   const { data, error } = await supabase
     .from("clothes")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) console.error("Fetch Error:", error.message);
-  else clothes.value = data || [];
+  if (error) {
+    console.error("Fetch Error:", error.message);
+  } else {
+    clothes.value = data || [];
+  }
 };
 
-// Save (Add / Edit) Clothing Item
+// Save or update clothing item
 const saveClothingItem = async () => {
   let imageUrl = "";
 
   if (file.value) {
-    const filePath = `clothes/${Date.now()}-${file.value.name}`;
-    const { data, error } = await supabase.storage
+    const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 10000)}-${
+      file.value.name
+    }`;
+    const filePath = `clothes/${uniqueName}`;
+
+    const { error: uploadError } = await supabase.storage
       .from("clothes")
       .upload(filePath, file.value);
 
-    if (error) {
-      console.error("Upload Error:", error.message);
+    if (uploadError) {
+      console.error("Upload Error:", uploadError.message);
       return;
     }
 
     const { data: publicUrl } = supabase.storage
       .from("clothes")
       .getPublicUrl(filePath);
+
+    if (!publicUrl?.publicUrl) {
+      console.error("Error getting image URL");
+      return;
+    }
+
     imageUrl = publicUrl.publicUrl;
   }
 
+  const payload = {
+    name: name.value,
+    category: category.value,
+    color: color.value,
+    occasion: occasion.value,
+    weather: weather.value,
+    ...(imageUrl && { image_url: imageUrl }),
+  };
+
   if (editingId.value) {
-    // Update Existing Item
     const { error } = await supabase
       .from("clothes")
-      .update({
-        name: name.value,
-        category: category.value,
-        color: color.value,
-        occasion: occasion.value,
-        weather: weather.value,
-        ...(imageUrl ? { image_url: imageUrl } : {}),
-      })
+      .update(payload)
       .eq("id", editingId.value);
 
-    if (error) console.error("Update Error:", error.message);
+    if (error) {
+      console.error("Update Error:", error.message);
+      return;
+    }
   } else {
-    // Insert New Item
-    const { error } = await supabase.from("clothes").insert([
-      {
-        name: name.value,
-        category: category.value,
-        color: color.value,
-        occasion: occasion.value,
-        weather: weather.value,
-        image_url: imageUrl,
-      },
-    ]);
+    const { error } = await supabase.from("clothes").insert([payload]);
 
-    if (error) console.error("Insert Error:", error.message);
+    if (error) {
+      console.error("Insert Error:", error.message);
+      return;
+    }
   }
 
-  // Reset Form
+  // Reset
   name.value = "";
   category.value = "";
   color.value = "";
@@ -180,7 +190,7 @@ const saveClothingItem = async () => {
   fetchClothes();
 };
 
-// Edit Item
+// Edit
 const editItem = (item: any) => {
   name.value = item.name;
   category.value = item.category;
@@ -190,15 +200,13 @@ const editItem = (item: any) => {
   editingId.value = item.id;
 };
 
-// Delete Clothing Item
+// Delete
 const deleteItem = async (id: string) => {
   const { error } = await supabase.from("clothes").delete().eq("id", id);
-
   if (error) console.error("Delete Error:", error.message);
   fetchClothes();
 };
 
-// Fetch data on component mount
 onMounted(fetchClothes);
 </script>
 
@@ -232,6 +240,7 @@ td {
   height: auto;
   border-radius: 5px;
 }
+
 .submit-btn {
   background-color: #007bff;
   color: white;

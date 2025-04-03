@@ -51,16 +51,16 @@
           <div
             v-for="(message, i) in messages"
             :key="i"
-            :class="[
-              'p-8 w-full rounded-lg flex items-center gap-x-3',
-              message.role === 'user'
-                ? 'bg-white border border-black/10'
-                : 'bg-slate-200',
-            ]"
+            :class="`
+              p-8 w-full rounded-lg ${
+                message.role === 'user'
+                  ? 'bg-white border border-black/10'
+                  : 'bg-slate-20'
+              }`"
           >
             <UserAvatar v-if="message.role === 'user'" />
             <BotAvatar v-else />
-            <p class="text-sm">{{ message.content }}</p>
+            <p class="text-sm" v-if="message.content">{{ message.content }}</p>
           </div>
         </div>
       </div>
@@ -92,6 +92,24 @@ const submitForm = async () => {
 
   const newMessages = [...messages.value, userMessage];
 
+  // const { data, error } = await useFetch("/api/fashionbot", {
+  //   method: "POST",
+  //   body: {
+  //     messages: newMessages,
+  //   },
+  // });
+
+  // if (data.value) {
+  //   messages.value = [
+  //     ...messages.value,
+  //     userMessage,
+  //     { role: "assistant", content: data.value.content as string },
+  //   ];
+  // }
+  // if (error.value) {
+  //   console.log("[FashionBot_Error]", error.value.statusMessage);
+  // }
+
   try {
     const data = await $fetch("/api/fashionbot", {
       method: "POST",
@@ -100,19 +118,18 @@ const submitForm = async () => {
       },
     });
 
+    console.log("Bot Response:", data);
+
     messages.value = [
       ...messages.value,
       userMessage,
       {
         role: "assistant",
-        content: data.content || "Sorry, I didn't get that.",
+        content: data.content,
       },
     ];
   } catch (error: any) {
-    console.error(
-      "[Conversation_Error]",
-      error?.data?.message || error.message
-    );
+    console.error("[FashionBot_Error]", error.message);
   }
 
   isLoading.value = false;

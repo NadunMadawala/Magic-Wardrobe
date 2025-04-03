@@ -7,7 +7,7 @@
       <p
         class="text-muted-foreground font-light text-sm md:text-lg text-center"
       >
-        Explore the power of AI & chat with smartest AI ..
+        Explore the power of AI & chat with Fashion Bot...
       </p>
     </div>
     <div class="px-4 md:px-20 lg:px-32 space-y-4">

@@ -32,7 +32,7 @@ export const dashboardLinks =[
     {
         label: 'Logout',
         icon:'lucide:log-out',
-        link: '/logout',
+        link: '/auth',
         color:'text-red-700'
     },
     
