@@ -3,7 +3,7 @@
     <!-- Heading -->
     <Heading
       title="Planned Looks"
-      description="A fashion bot that helps you find the imfpration about outfits & Fashion."
+      description="Plan your outfit for the day."
       icon="lucide:calendar-clock"
       iconColor="text-sky-800"
       bgColor="bg-sky-800/10"

@@ -3,7 +3,7 @@
     <!-- Heading -->
     <Heading
       title="Looks"
-      description="A fashion bot that helps you find the imfpration about outfits & Fashion."
+      description="Make matching looks for future use."
       icon="lucide:shirt"
       iconColor="text-sky-800"
       bgColor="bg-sky-800/10"

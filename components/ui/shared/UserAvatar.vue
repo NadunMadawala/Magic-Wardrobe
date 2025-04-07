@@ -20,7 +20,7 @@
 </template> -->
 <!-- UserAvatar.vue -->
 <template>
-  <div class="user-avatar">🧑</div>
+  <div class="user-avatar">🧑You</div>
 </template>
 
 <script setup lang="ts">

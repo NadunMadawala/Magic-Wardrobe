@@ -3,7 +3,7 @@
     <!-- Heading -->
     <Heading
       title="Magic Looks"
-      description="A fashion bot that helps you find the imfpration about outfits & Fashion."
+      description="Magic Look can generate your desirable outfit."
       icon="lucide:wand"
       iconColor="text-orange-800"
       bgColor="bg-orange-800/10"

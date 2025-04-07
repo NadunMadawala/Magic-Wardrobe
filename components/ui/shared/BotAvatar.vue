@@ -6,7 +6,7 @@
 
 <!-- BotAvatar.vue -->
 <template>
-  <div class="bot-avatar">🤖</div>
+  <div class="bot-avatar">🤖Fashion Bot</div>
 </template>
 
 <script setup lang="ts"></script>
