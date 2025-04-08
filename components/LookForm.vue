@@ -31,7 +31,7 @@
         <img
           v-if="look.image_url"
           :src="look.image_url"
-          class="w-full h-48 object-cover"
+          class="w-full h-58 object-cover"
           alt="Look image"
         />
         <div class="p-4">
