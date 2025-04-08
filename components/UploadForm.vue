@@ -1,198 +1,214 @@
 <template>
-  <div class="max-w-lg mx-auto">
+  <div class="max-w-5xl mx-auto px-4">
     <!-- Upload Form -->
-    <form @submit.prevent="uploadImages">
+    <form @submit.prevent="submitUpload" class="space-y-4 max-w-lg mx-auto mt-6">
       <input
         v-model="title"
         type="text"
         placeholder="Title"
-        class="input-field"
         required
+        class="input"
       />
       <textarea
         v-model="description"
         placeholder="Description"
-        class="input-field"
-        required
+        class="input"
       ></textarea>
-
-      <!-- Multiple File Upload Input -->
-      <input
-        type="file"
-        multiple
-        @change="handleFileUpload"
-        accept="image/*"
-        class="file-input"
-        required
-      />
-
+      <!-- ✅ File input with ref -->
+      <input type="file" @change="handleFile" ref="fileInput" class="input" />
       <button type="submit" :disabled="loading" class="submit-btn">
-        {{ loading ? "Uploading..." : "Upload" }}
+        {{ editingId ? "Update Upload" : loading ? "Uploading..." : "Upload" }}
       </button>
     </form>
 
-    <!-- Uploaded Data Table -->
-    <div v-if="uploads.length > 0" class="uploads-container">
-      <h2 class="text-center mt-6">Uploaded Files</h2>
-      <table class="uploads-table">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Title</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="upload in uploads" :key="upload.id">
-            <td>
-              <img
-                :src="upload.image_url"
-                alt="Uploaded Image"
-                class="uploaded-image"
-              />
-            </td>
-            <td>{{ upload.title }}</td>
-            <td>{{ upload.description }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Grid of Uploaded Images -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+      <div
+        v-for="upload in uploads"
+        :key="upload.id"
+        class="rounded overflow-hidden shadow-lg bg-white"
+      >
+        <img
+          v-if="upload.image_url"
+          :src="upload.image_url"
+          class="w-full h-58 object-cover"
+          alt="Uploaded image"
+        />
+        <div class="p-4">
+          <h3 class="text-lg font-bold mb-1">📌 {{ upload.title }}</h3>
+          <p class="text-sm text-gray-800">📝 {{ upload.description }}</p>
+
+          <div class="mt-3 flex gap-2">
+            <button
+              @click="editUpload(upload)"
+              class="px-3 py-1 text-sm bg-yellow-400 text-black rounded"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              @click="deleteUpload(upload.id)"
+              class="px-3 py-1 text-sm bg-red-500 text-white rounded"
+            >
+              🗑️ Delete
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useSupabaseClient } from "#imports";
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = useSupabaseClient();
+// Supabase Client
+const supabase = createClient(
+  "https://jgilxwwltwkokehfyzzn.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnaWx4d3dsdHdrb2tlaGZ5enpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4ODkxOTgsImV4cCI6MjA1MzQ2NTE5OH0.To58wxgIpQvVfzdE8sFtEwzrhqrbPn7A1F1bOa1IPI8"
+);
+
+// Form fields
 const title = ref("");
 const description = ref("");
-const files = ref<FileList | null>(null);
+const file = ref<File | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null); // ✅ file input ref
 const loading = ref(false);
-const uploads = ref<
-  { id: string; title: string; description: string; image_url: string }[]
->([]);
+const editingId = ref<number | null>(null);
 
-// Handle multiple file selection
-const handleFileUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target.files?.length) {
-    files.value = target.files;
-  }
-};
+// Upload list
+const uploads = ref<any[]>([]);
 
-// Upload multiple images to Supabase Storage
-const uploadImages = async () => {
-  if (!files.value || files.value.length === 0) {
-    alert("Please select at least one file!");
-    return;
-  }
-
-  loading.value = true;
-  const imageUrls: string[] = [];
-
-  for (const file of files.value) {
-    const filePath = `uploads/${Date.now()}-${file.name}`;
-
-    const { data, error } = await supabase.storage
-      .from("images")
-      .upload(filePath, file);
-
-    if (error) {
-      console.error("Upload Error:", error.message);
-      loading.value = false;
-      return;
-    }
-
-    // Get the public URL of the uploaded image
-    const { data: imageUrl } = supabase.storage
-      .from("images")
-      .getPublicUrl(filePath);
-
-    imageUrls.push(imageUrl.publicUrl);
-  }
-
-  // Save image URLs + text fields in Supabase Database
-  const { error: dbError } = await supabase.from("uploads").insert(
-    imageUrls.map((url) => ({
-      title: title.value,
-      description: description.value,
-      image_url: url,
-    }))
-  );
-
-  if (dbError) {
-    console.error("Database Error:", dbError.message);
-  } else {
-    alert("Upload successful!");
-    title.value = "";
-    description.value = "";
-    files.value = null;
-    fetchUploads(); // Fetch latest uploaded data
-  }
-
-  loading.value = false;
-};
-
-// Fetch all uploaded files from Supabase
+// Fetch existing uploads
 const fetchUploads = async () => {
   const { data, error } = await supabase
     .from("uploads")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("id", { ascending: false });
 
   if (error) {
-    console.error("Fetch Error:", error.message);
+    console.error("Fetch error:", error.message);
   } else {
     uploads.value = data || [];
   }
 };
 
-// Fetch uploads when the component is mounted
+// Handle file input
+const handleFile = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files?.length) {
+    file.value = target.files[0];
+  }
+};
+
+// Submit new or updated upload
+const submitUpload = async () => {
+  loading.value = true;
+
+  const payload: any = {
+    title: title.value,
+    description: description.value,
+  };
+
+  if (file.value) {
+    const filePath = `${Date.now()}-${file.value.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from("clothes")
+      .upload(filePath, file.value, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.value.type,
+      });
+
+    if (uploadError) {
+      console.error("Upload failed:", uploadError.message);
+      loading.value = false;
+      return;
+    }
+
+    const { data: imageUrl } = supabase.storage
+      .from("clothes")
+      .getPublicUrl(filePath);
+    payload.image_url = imageUrl.publicUrl;
+  }
+
+  if (editingId.value) {
+    // Update
+    const { error } = await supabase
+      .from("uploads")
+      .update(payload)
+      .eq("id", editingId.value);
+
+    if (error) {
+      console.error("Update failed:", error.message);
+    } else {
+      alert("Upload updated!");
+    }
+  } else {
+    // Insert
+    const { error } = await supabase.from("uploads").insert(payload);
+    if (error) {
+      console.error("Insert failed:", error.message);
+    } else {
+      alert("Upload saved!");
+    }
+  }
+
+  // Reset
+  title.value = "";
+  description.value = "";
+  file.value = null;
+  editingId.value = null;
+  if (fileInput.value) {
+    fileInput.value.value = ""; // ✅ clears the input UI
+  }
+  loading.value = false;
+
+  fetchUploads();
+};
+
+// Edit handler
+const editUpload = (upload: any) => {
+  title.value = upload.title;
+  description.value = upload.description;
+  editingId.value = upload.id;
+  file.value = null;
+  if (fileInput.value) {
+    fileInput.value.value = ""; // clear file input on edit too
+  }
+};
+
+// Delete handler
+const deleteUpload = async (id: number) => {
+  const { error } = await supabase.from("uploads").delete().eq("id", id);
+  if (error) {
+    console.error("Delete failed:", error.message);
+  } else {
+    fetchUploads();
+  }
+};
+
 onMounted(fetchUploads);
 </script>
 
 <style scoped>
-.input-field {
+.input {
   display: block;
   width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+  padding: 10px;
   border: 1px solid #ddd;
-}
-
-.file-input {
-  display: block;
   margin-bottom: 10px;
+  border-radius: 5px;
 }
-
 .submit-btn {
-  background-color: #007bff;
+  background: #007bff;
   color: white;
   padding: 10px;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
 }
-
-.uploads-container {
-  margin-top: 20px;
-}
-
-.uploads-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.uploads-table th,
-.uploads-table td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: center;
-}
-
-.uploaded-image {
-  width: 100px;
-  height: auto;
-  border-radius: 8px;
+button:hover {
+  opacity: 0.9;
 }
 </style>
